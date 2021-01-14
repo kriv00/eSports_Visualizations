@@ -1,0 +1,158 @@
+---
+title: "Hypothesis Testing"
+output: html_notebook
+author: Kelly Rivera
+---
+
+# Exploring eSports Earnings
+
+Data set: eSports Earnings: Money earned by Players & Teams from eSports Tournaments
+
+## Install & load libraries
+```{r}
+#Install tidyverse
+#install.packages("tidyverse")
+
+#load libraries
+library(tidyverse)
+library(ggplot2)
+```
+
+
+## Import Dataset CSV
+```{r}
+# Importing the csv file
+esports <- read_csv("highest_earning_teams.csv")
+head(esports, 5)
+```
+
+## Exploring the data
+```{r}
+# Dropping these games from the data set 
+Esports <- esports[esports$Game != "Arena of Valor" & esports$Game != "Starcraft II", ] 
+
+#Renaming the games for readablility
+Esports[Esports$Game == "Overwatch", c("Game")] <- "OW"
+Esports[Esports$Game == "Counter-Strike: Global Offensive", c("Game")] <- "CSGO"
+Esports[Esports$Game == "League of Legends", c("Game")] <- "LoL"
+Esports[Esports$Game == "Heroes of the Storm", c("Game")] <- "HoTS" 
+Esports[Esports$Game == "Hearthstone", c("Game")] <- "HS" 
+
+Esports
+```
+```{r}
+pieChartData <- data.frame(Genre = c("Battle Royale", "Collectible Card Game", "First-Person Shooter", "Multiplayer Online Battle Arena"),
+                      TotalTournaments = c(sum(subset(Esports, Esports$Genre == "Battle Royale")$TotalTournaments), 
+                                                  sum(subset(Esports, Esports$Genre == "Collectible Card Game")$TotalTournaments), 
+                                                  sum(subset(Esports, Esports$Genre == "First-Person Shooter")$TotalTournaments),
+                                                sum(subset(Esports, Esports$Genre == "Multiplayer Online Battle Arena")$TotalTournaments)),
+                      total = c(sum(Esports$TotalTournaments))) %>%
+                    mutate(labels = round((TotalTournaments/total) * 100, 1))
+
+pieChartData
+
+```
+
+
+```{r}
+#Calculating the total number of tournaments by game
+totalTournOW <- sum(subset(Esports, Esports$Game == "OW")$TotalTournaments)
+totalTournDota2 <- sum(subset(Esports, Esports$Game == "Dota 2")$TotalTournaments)
+totalTournFN <- sum(subset(Esports, Esports$Game == "Fortnite")$TotalTournaments)
+totalTournLoL <- sum(subset(Esports, Esports$Game == "LoL")$TotalTournaments)
+totalTournCSGO <- sum(subset(Esports, Esports$Game == "CSGO")$TotalTournaments)
+totalTournHoTS <- sum(subset(Esports, Esports$Game == "HoTS")$TotalTournaments)
+totalTournPUBG <- sum(subset(Esports, Esports$Game == "PUBG")$TotalTournaments)
+totalTournHS <- sum(subset(Esports, Esports$Game == "HS")$TotalTournaments)
+
+# Calculating the total amount of prize miney won by game
+totalPrizeOW <- sum(subset(Esports, Esports$Game == "OW")$TotalUSDPrize)
+totalPrizeDota2 <- sum(subset(Esports, Esports$Game == "Dota 2")$TotalUSDPrize)
+totalPrizeFN <- sum(subset(Esports, Esports$Game == "Fortnite")$TotalUSDPrize)
+totalPrizeLoL <- sum(subset(Esports, Esports$Game == "LoL")$TotalUSDPrize)
+totalPrizeCSGO <- sum(subset(Esports, Esports$Game == "CSGO")$TotalUSDPrize)
+totalPrizeHoTS <- sum(subset(Esports, Esports$Game == "HoTS")$TotalUSDPrize)
+totalPrizePUBG <- sum(subset(Esports, Esports$Game == "PUBG")$TotalUSDPrize)
+totalPrizeHS <- sum(subset(Esports, Esports$Game == "HS")$TotalUSDPrize)
+
+```
+
+
+```{r}
+#Setting up the new Dataframe that tells us the Total Prizes won and total tournaments by game
+newData <- data.frame(Game = c("OW", "Dota 2", "Fortnite", "LoL", "CSGO", "HoTS", "PUBG", "HS"),
+                      TotalTournamentsPerGame = c(totalTournOW, totalTournDota2, totalTournFN, totalTournLoL,
+                                                  totalTournCSGO, totalTournHoTS, totalTournPUBG, totalTournHS), 
+                      TotalPrizePerGame = c(totalPrizeOW, totalPrizeDota2, totalPrizeFN, totalPrizeLoL,
+                                            totalPrizeCSGO, totalPrizeHoTS, totalPrizePUBG, totalPrizeHS))
+
+newData
+```
+
+
+## Bar chart 
+We want to see the 
+```{r}
+ggplot(data = Esports, mapping = aes(x = Game, y = TotalUSDPrize/100,  fill = Genre)) + 
+  geom_col() +
+  labs(title = "Total Prize Money Won by Game" ,
+       subtitle = "Source: eSports Earnings Money earned by Players & Teams from eSports Tournaments" ,
+       y = "Total Prize Money" ,
+       x = "Game")
+```
+
+
+### Pie Chart of the Number of Tournaments per Game Genre 
+```{r}
+pie <- ggplot(data = pieChartData, mapping = aes(x= "", y = TotalTournaments, fill=Genre)) +
+        geom_bar(width = 1, stat = "identity") +
+        coord_polar("y", start = 0) +
+            labs(title = "Number of Tournaments per Game Genre " ,
+                  subtitle = "Source: eSports Earnings Money earned by Players & Teams from eSports Tournaments",
+                  y = "Number of Tournaments",
+                 caption = "*Blue = 40.8%     *Purple = 42.8%")
+pie
+```
+
+
+```{r}
+# Only grabbing teams that play multiple esports games
+teamProgression <- filter(Esports, TeamName %in% c("Team Liquid", "Cloud9", "MVP", "Fnatic", 
+                                                   "compLexity Gaming"))
+teamProgression
+```
+
+
+
+
+### line plot of the number of the total earnings vs number of tournaments
+```{r}
+ggplot(data = teamProgression , aes(x = TotalTournaments , y = TotalUSDPrize/100)) +
+        geom_line(aes(color = TeamName)) +
+        geom_point(aes(alpha = Game), size = 1)  +
+        labs(title = "Number of Tournaments vs Total Prize Money Won Per Game" ,
+             subtitle = "Source: Kaggle",
+             caption = "*Only teams that played multiple eSports were used in this analysis" )
+
+```
+
+
+
+
+### scatterplot of the amount of money based on the release year of each game
+
+```{r}
+ggplot(data = newData, mapping = aes(x = TotalTournamentsPerGame, y = TotalPrizePerGame/100)) +
+        geom_point(aes(color = Game)) +
+        labs(title = "Total Amount of Tournaments vs. Total Prize Money Won" ,
+             subtitle = "Source: Kaggle",
+             y = "Total Prize Money Won",
+             x = "Total Amount of Tournaments")
+```
+
+
+
+
+
+
+

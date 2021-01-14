@@ -78,8 +78,7 @@ newData
 ```
 
 
-## Bar chart 
-We want to see the 
+## Bar Chart 
 ```{r}
 ggplot(data = Esports, mapping = aes(x = Game, y = TotalUSDPrize/100,  fill = Genre)) + 
   geom_col() +
@@ -90,7 +89,7 @@ ggplot(data = Esports, mapping = aes(x = Game, y = TotalUSDPrize/100,  fill = Ge
 ```
 
 
-### Pie Chart of the Number of Tournaments per Game Genre 
+### Pie Chart: The Number of Tournaments per Game Genre 
 ```{r}
 pie <- ggplot(data = Esports, mapping = aes(x= "", y = TotalTournaments, fill=Genre)) +
         geom_bar(width = 1, stat = "identity") +
@@ -112,7 +111,7 @@ teamProgression
 
 
 
-### line plot of the number of the total earnings vs number of tournaments
+### Line Chart: Comparing Total Number Of Tournaments and Prize Money per Game
 ```{r}
 ggplot(data = teamProgression , aes(x = TotalTournaments , y = TotalUSDPrize/100)) +
         geom_line(aes(color = TeamName)) +
@@ -126,7 +125,7 @@ ggplot(data = teamProgression , aes(x = TotalTournaments , y = TotalUSDPrize/100
 
 
 
-### scatterplot of the amount of money based on the release year of each game
+### Scatterplot: Comparing total amount of tournaments and total prize money won
 
 ```{r}
 ggplot(data = newData, mapping = aes(x = TotalTournamentsPerGame, y = TotalPrizePerGame/100)) +
